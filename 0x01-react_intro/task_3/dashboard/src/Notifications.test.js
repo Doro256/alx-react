@@ -24,7 +24,7 @@ describe('Notifications', () => {
     });
  
     it('Renders correct text', () => {
-      const notificationsp = shallow(<Notifications />);
+      const notifications = shallow(<Notifications />);
     
       expect(notifications.find('p').text()).toBe("Here is the list of notifications");
     });
