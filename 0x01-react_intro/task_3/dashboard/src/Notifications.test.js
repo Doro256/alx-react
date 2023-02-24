@@ -1,6 +1,7 @@
 import React from 'react';
 import App from './App';
 import Enzyme, { shallow } from 'enzyme';
+import Notifications from './Notifications'
 
 
 describe('Notifications', () => {
