@@ -3,7 +3,7 @@ import App from "./App";
 import Login from "../Login/Login";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
-import Notifications from "../Notifications/Notifications";
+import Notifications from "../../../../task_2/dashboard/src/Notifications/Notifications";
 import { shallow } from "enzyme";
 
 describe("App tests", () => {
