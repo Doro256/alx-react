@@ -46,7 +46,6 @@ class App extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Notifications />
         <div className="App">
           <div className="heading-section">
             <Notifications listNotifications={this.listNotifications} />
