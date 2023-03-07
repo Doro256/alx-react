@@ -21,3 +21,13 @@ function CourseList({ listCourses }) {
     </table>
   );
 }
+
+CourseList.propTypes = {
+  listCourses: PropTypes.arrayOf(CourseShape),
+};
+
+CourseList.defaultProps = {
+  listCourses: [],
+};
+
+export default CourseList;
