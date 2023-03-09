@@ -1,13 +1,12 @@
 import React from "react";
-import Notifications from "../Notifications/Notifications";
 import Header from "../Header/Header";
-import Login from "../Login/Login";
 import Footer from "../Footer/Footer";
+import Login from "../Login/Login";
 import CourseList from "../CourseList/CourseList";
-import PropTypes from "prop-types";
+import Notifications from "../Notifications/Notifications";
 import "./App.css";
+import PropTypes from "prop-types";
 import { getLatestNotification } from "../utils/utils";
-
 
 class App extends React.Component {
   constructor(props) {
@@ -42,7 +41,6 @@ class App extends React.Component {
     document.removeEventListener("keydown", this.handleKeyPress);
   }
 
-
   render() {
     return (
       <React.Fragment>
@@ -56,7 +54,7 @@ class App extends React.Component {
         </div>
       </React.Fragment>
     );
-  } 
+  }
 }
 
 App.defaultProps = {
