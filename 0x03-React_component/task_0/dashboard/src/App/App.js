@@ -6,6 +6,8 @@ import Footer from "../Footer/Footer";
 import CourseList from "../CourseList/CourseList";
 import PropTypes from "prop-types";
 import "./App.css";
+import { getLatestNotification } from "../utils/utils";
+
 
 class App extends React.Component {
   listCourses = [
@@ -23,10 +25,12 @@ class App extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Notifications />
-        <div className="App">
-          <Header />
-          {isLoggedIn ? <CourseList /> : <Login />}
+         <div className="App">
+          <div className="heading-section">
+            <Notifications listNotifications={this.listNotifications} />
+            <Header />
+          </div>
+          {this.props.isLoggedIn ? <CourseList listCourses={this.listCourses} /> : <Login />}
           <Footer />
         </div>
       </React.Fragment>
