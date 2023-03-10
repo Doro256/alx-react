@@ -13,4 +13,4 @@ function Header() {
   );
 }
 
-export default App;
+export default Header;
