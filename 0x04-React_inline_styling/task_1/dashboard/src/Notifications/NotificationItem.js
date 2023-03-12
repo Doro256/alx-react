@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import "./Notifications.css";
 import PropTypes from "prop-types";
 
 class NotificationItem extends Component {
