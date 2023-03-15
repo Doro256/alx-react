@@ -1,7 +1,7 @@
 import { fromJS } from 'immutable';
 
 export default function accessImmutableObject(object, array) {
-    const objVal = fromJS(object);
+  const ObjVal = fromJS(object);
 
-    return objVal.getIn(array,undefined);
+  return ObjVal.getIn(array, undefined);
 }
