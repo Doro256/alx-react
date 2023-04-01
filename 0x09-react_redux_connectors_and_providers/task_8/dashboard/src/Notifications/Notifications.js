@@ -1,186 +1,283 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import Notifications from '../Notifications/Notifications';
-import Header from '../Header/Header';
-import BodySection from '../BodySection/BodySection';
-import BodySectionWithMarginBottom from '../BodySection/BodySectionWithMarginBottom';
-import Login from '../Login/Login';
-import CourseList from '../CourseList/CourseList';
-import Footer from '../Footer/Footer';
-import PropTypes from 'prop-types';
-import { getLatestNotification } from '../utils/utils';
-import { StyleSheet, css } from 'aphrodite';
-import { user, logOut } from './AppContext';
-import AppContext from './AppContext';
+import React, { PureComponent, Component } from "react";
+import { connect } from "react-redux";
 import {
-	displayNotificationDrawer,
-	hideNotificationDrawer,
-	loginRequest,
-	logout,
-} from '../actions/uiActionCreators';
+  fetchNotifications,
+  markAsAread,
+  setNotificationFilter,
+} from "../actions/notificationActionCreators";
+import NotificationItem from "./NotificationItem";
+import { getUnreadNotificationsByType } from "../selectors/notificationSelector";
+import PropTypes from "prop-types";
+import closeIcon from "../assets/close-icon.png";
+import { StyleSheet, css } from "aphrodite";
 
-const listCourses = [
-	{ id: 1, name: 'ES6', credit: 60 },
-	{ id: 2, name: 'Webpack', credit: 20 },
-	{ id: 3, name: 'React', credit: 40 },
-];
+export class Notifications extends Component {
+  constructor(props) {
+    super(props);
+  }
 
-document.body.style.margin = 0;
+  componentDidMount() {
+    this.props.fetchNotifications();
+  }
 
-export class App extends Component {
-	constructor(props) {
-		super(props);
-		this.handleKeyCombination = this.handleKeyCombination.bind(this);
-		this.state = {
-			user,
-		};
-	}
+  render() {
+    const {
+      displayDrawer,
+      listNotifications,
+      handleDisplayDrawer,
+      handleHideDrawer,
+      markNotificationAsRead,
+      setNotificationFilter,
+    } = this.props;
 
-	handleKeyCombination(e) {
-		if (e.key === 'h' && e.ctrlKey) {
-			alert('Logging you out');
-			this.props.logout();
-		}
-	}
+    // const displayDrawer = true;
 
-	componentDidMount() {
-		document.addEventListener('keydown', this.handleKeyCombination);
-	}
+    const menuPStyle = css(
+      displayDrawer ? styles.menuItemPNoShow : styles.menuItemPShow
+    );
 
-	componentWillUnmount() {
-		document.removeEventListener('keydown', this.handleKeyCombination);
-	}
+    return (
+      <>
+        <div
+          className={css(styles.menuItem)}
+          id="menuItem"
+          onClick={handleDisplayDrawer}
+        >
+          <p className={menuPStyle}>Your notifications</p>
+        </div>
+        {displayDrawer && (
+          <div className={css(styles.notifications)} id="Notifications">
+            <button
+              style={{
+                background: "transparent",
+                border: "none",
+                position: "absolute",
+                right: 20,
+              }}
+              aria-label="close"
+              onClick={handleHideDrawer}
+              id="closeNotifications"
+            >
+              <img
+                src={closeIcon}
+                alt="close-icon"
+                className={css(styles.notificationsButtonImage)}
+              />
+            </button>
+            <p className={css(styles.notificationsP)}>
+              Here is the list of notifications
+            </p>
+            <button
+              type="button"
+              className={css(styles.filterButton)}
+              id="buttonFilterUrgent"
+              onClick={() => {
+                setNotificationFilter("URGENT");
+              }}
+            >
+              ❗❗
+            </button>
+            <button
+              type="button"
+              className={css(styles.filterButton)}
+              id="buttonFilterDefault"
+              onClick={() => {
+                setNotificationFilter("DEFAULT");
+              }}
+            >
+              💠
+            </button>
+            <ul className={css(styles.notificationsUL)}>
+              {(!listNotifications || listNotifications.count() === 0) && (
+                <NotificationItem
+                  type="noNotifications"
+                  value="No new notifications for now"
+                />
+              )}
 
-	render() {
-		const { user, listNotifications } = this.state;
+              {listNotifications &&
+                listNotifications.valueSeq().map((notification) => {
+                  let html = notification.get("html");
 
-		const {
-			isLoggedIn,
-			displayDrawer,
-			displayNotificationDrawer,
-			hideNotificationDrawer,
-			login,
-			logout,
-		} = this.props;
+                  if (html) html = html.toJS();
 
-		return (
-			<>
-				<Notifications
-					listNotifications={listNotifications}
-					displayDrawer={displayDrawer}
-					handleDisplayDrawer={displayNotificationDrawer}
-					handleHideDrawer={hideNotificationDrawer}
-					markNotificationAsRead={this.markNotificationAsRead}
-				/>
-				<div className={css(styles.container)}>
-					<div className={css(styles.app)}>
-						<Header />
-					</div>
-					<div className={css(styles.appBody)}>
-						{!isLoggedIn ? (
-							<BodySectionWithMarginBottom title='Log in to continue'>
-								<Login logIn={login} />
-							</BodySectionWithMarginBottom>
-						) : (
-							<BodySectionWithMarginBottom title='Course list'>
-								<CourseList listCourses={listCourses} />
-							</BodySectionWithMarginBottom>
-						)}
-					</div>
-					<BodySection title='News from the School'>
-						<p>
-							Lorem Ipsum is simply dummy text of the printing and typesetting
-							industry. Lorem Ipsum has been the industry's standard dummy text
-							ever since the 1500s, when an unknown printer took a galley of
-							type and scrambled it to make a type specimen book. It has
-							survived not only five centuries, but also the leap into
-							electronic typesetting, remaining essentially unchanged. It was
-							popularised in the 1960s with the release of Letraset sheets
-							containing Lorem Ipsum passages, and more recently with desktop
-							publishing software like Aldus PageMaker including versions of
-							Lorem Ipsum.
-						</p>
-					</BodySection>
-
-					<div className={css(styles.footer)}>
-						<Footer />
-					</div>
-				</div>
-			</>
-		);
-	}
+                  return (
+                    <NotificationItem
+                      key={notification.get("guid")}
+                      id={notification.get("guid")}
+                      type={notification.get("type")}
+                      value={notification.get("value")}
+                      html={html}
+                      markAsRead={markNotificationAsRead}
+                    />
+                  );
+                })}
+            </ul>
+          </div>
+        )}
+      </>
+    );
+  }
 }
 
-App.defaultProps = {
-	isLoggedIn: false,
-	displayDrawer: false,
-	displayNotificationDrawer: () => {},
-	hideNotificationDrawer: () => {},
-	login: () => {},
+Notifications.defaultProps = {
+  displayDrawer: false,
+  listNotifications: null,
+  handleDisplayDrawer: () => {},
+  handleHideDrawer: () => {},
+  markNotificationAsRead: () => {},
+  fetchNotifications: () => {},
+  setNotificationFilter: () => {},
 };
 
-App.propTypes = {
-	isLoggedIn: PropTypes.bool,
-	displayDrawer: PropTypes.bool,
-	displayNotificationDrawer: PropTypes.func,
-	hideNotificationDrawer: PropTypes.func,
-	login: PropTypes.func,
+Notifications.propTypes = {
+  displayDrawer: PropTypes.bool,
+  listNotifications: PropTypes.object,
+  handleDisplayDrawer: PropTypes.func,
+  handleHideDrawer: PropTypes.func,
+  markNotificationAsRead: PropTypes.func,
+  setNotificationFilter: PropTypes.func,
 };
 
 const cssVars = {
-	mainColor: '#e01d3f',
+  mainColor: "#e01d3f",
 };
 
 const screenSize = {
-	small: '@media screen and (max-width: 900px)',
+  small: "@media screen and (max-width: 900px)",
+};
+
+const opacityKeyframes = {
+  from: {
+    opacity: 0.5,
+  },
+
+  to: {
+    opacity: 1,
+  },
+};
+
+const translateYKeyframes = {
+  "0%": {
+    transform: "translateY(0)",
+  },
+
+  "50%": {
+    transform: "translateY(-5px)",
+  },
+
+  "75%": {
+    transform: "translateY(5px)",
+  },
+
+  "100%": {
+    transform: "translateY(0)",
+  },
+};
+
+const borderKeyframes = {
+  "0%": {
+    border: `3px dashed deepSkyBlue`,
+  },
+
+  "100%": {
+    border: `3px dashed ${cssVars.mainColor}`,
+  },
 };
 
 const styles = StyleSheet.create({
-	container: {
-		width: 'calc(100% - 16px)',
-		marginLeft: '8px',
-		marginRight: '8px',
-	},
+  menuItem: {
+    float: "right",
+    backgroundColor: "#fff8f8",
+    ":hover": {
+      cursor: "pointer",
+      animationName: [opacityKeyframes, translateYKeyframes],
+      animationDuration: "1s, 0.5s",
+      animationIterationCount: 3,
+    },
+  },
 
-	app: {
-		borderBottom: `3px solid ${cssVars.mainColor}`,
-	},
+  menuItemPNoShow: {
+    marginRight: "8px",
+    display: "none",
+  },
 
-	appBody: {
-		display: 'flex',
-		justifyContent: 'center',
-	},
+  menuItemPShow: {
+    marginRight: "8px",
+  },
 
-	footer: {
-		borderTop: `3px solid ${cssVars.mainColor}`,
-		width: '100%',
-		display: 'flex',
-		justifyContent: 'center',
-		textAlign: 'center',
-		position: 'fixed',
-		paddingBottom: '10px',
-		bottom: 0,
-		fontStyle: 'italic',
-		[screenSize.small]: {
-			position: 'static',
-		},
-	},
+  notifications: {
+    // float: "right",
+    // border: `3px dashed ${cssVars.mainColor}`,
+    padding: "10px",
+    marginBottom: "20px",
+    animationName: [borderKeyframes],
+    animationDuration: "0.8s",
+    animationIterationCount: 1,
+    animationFillMode: "forwards",
+    ":hover": {
+      border: `3px dashed deepSkyBlue`,
+      // animationFillMode: "forwards",
+    },
+    [screenSize.small]: {
+      float: "none",
+      border: "none",
+      listStyle: "none",
+      padding: 0,
+      fontSize: "20px",
+      ":hover": {
+        border: "none",
+        // animationFillMode: "forwards",
+      },
+      position: "absolute",
+      background: "white",
+      height: "110vh",
+      width: "100vw",
+      zIndex: 10,
+    },
+  },
+
+  notificationsButtonImage: {
+    width: "10px",
+  },
+
+  notificationsP: {
+    margin: 0,
+    marginTop: "15px",
+  },
+
+  notificationsUL: {
+    [screenSize.small]: {
+      padding: 0,
+    },
+  },
+
+  filterButton: {
+    height: "30px",
+    width: "50px",
+    backgroundColor: "AliceBlue",
+    border: "none",
+    display: "inline-block",
+    border: "1px solid CornflowerBlue",
+    boxShadow: "1px 1px CornflowerBlue",
+    margin: "5px 5px 0px 5px",
+  },
 });
 
-export const mapStateToProps = (state) => {
-	return {
-		isLoggedIn: state.ui.get('isUserLoggedIn'),
-		displayDrawer: state.ui.get('isNotificationDrawerVisible'),
-	};
+const mapStateToProps = (state) => {
+  const unreadNotificationsByType = getUnreadNotificationsByType(state);
+
+  return {
+    listNotifications: unreadNotificationsByType,
+  };
 };
 
 const mapDispatchToProps = {
-	displayNotificationDrawer,
-	hideNotificationDrawer,
-	login: loginRequest,
-	logout,
+  fetchNotifications,
+  markNotificationAsRead: markAsAread,
+  setNotificationFilter,
 };
 
-// export default App;
+// export default Notifications;
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(Notifications);
